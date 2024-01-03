@@ -492,6 +492,7 @@ FLOWS = {
         "syncthru",
         "synology_dsm",
         "system_bridge",
+        "systemairiam",
         "systemmonitor",
         "tado",
         "tailscale",
