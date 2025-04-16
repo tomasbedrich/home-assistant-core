@@ -46,8 +46,9 @@ async def mock_create_client():
 
 async def test_get_client_success(user_input) -> None:
     """Test successful client creation."""
-    async with get_client(user_input) as client:
-        client.head_bucket.assert_called_once_with(Bucket=user_input[CONF_BUCKET])
+    client = await get_client(user_input)
+    client.head_bucket.assert_called_once_with(Bucket=user_input[CONF_BUCKET])
+    await client.__aexit__(None, None, None)
 
 
 async def test_get_client_invalid_endpoint_url(user_input, mock_create_client) -> None:
@@ -56,8 +57,7 @@ async def test_get_client_invalid_endpoint_url(user_input, mock_create_client) -
     mock_create_client.__aenter__.side_effect = ValueError
 
     with pytest.raises(InvalidEndpointURLError):
-        async with get_client(user_input):
-            pass
+        await get_client(user_input)
 
 
 @pytest.mark.parametrize(
@@ -85,8 +85,7 @@ async def test_get_client_errors(
     mock_create_client.head_bucket.side_effect = side_effect
 
     with pytest.raises(expected_exception):
-        async with get_client(user_input):
-            pass
+        await get_client(user_input)
 
 
 async def test_get_client_invalid_bucket_name(user_input, mock_create_client) -> None:
@@ -96,5 +95,4 @@ async def test_get_client_invalid_bucket_name(user_input, mock_create_client) ->
     )
 
     with pytest.raises(InvalidBucketNameError):
-        async with get_client(user_input):
-            pass
+        await get_client(user_input)

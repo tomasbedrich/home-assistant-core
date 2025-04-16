@@ -29,7 +29,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: S3ConfigEntry) -> bool:
     """Set up S3 from a config entry."""
 
     try:
-        client = await get_client(cast(dict, entry.data)).__aenter__()
+        client = await get_client(cast(dict, entry.data))
     except InvalidCredentialsError as err:
         raise ConfigEntryError(
             translation_domain=DOMAIN,

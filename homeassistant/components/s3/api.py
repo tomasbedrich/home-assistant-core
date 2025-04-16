@@ -1,8 +1,5 @@
 """Thin aiobotocore wrapper to be used by S3 integration."""
 
-from collections.abc import AsyncGenerator
-from contextlib import asynccontextmanager
-
 from aiobotocore.client import AioBaseClient as S3Client
 from aiobotocore.session import AioSession
 from botocore.exceptions import (
@@ -12,19 +9,21 @@ from botocore.exceptions import (
 )
 
 
-@asynccontextmanager
-async def get_client(data: dict[str, str]) -> AsyncGenerator[S3Client]:
-    """Yield S3 client with verified access to the Bucket."""
+async def get_client(data: dict[str, str]) -> S3Client:
+    """Return S3 client with verified access to the Bucket.
+
+    The caller is responsible for closing the client using `__aexit__(...)`.
+    """
     session = AioSession()
     try:
-        async with session.create_client(
+        # pylint:disable-next=unnecessary-dunder-call
+        client = await session.create_client(
             "s3",
             endpoint_url=data.get("endpoint_url"),
             aws_secret_access_key=data["secret_access_key"],
             aws_access_key_id=data["access_key_id"],
-        ) as client:
-            await client.head_bucket(Bucket=data["bucket"])
-            yield client
+        ).__aenter__()
+        await client.head_bucket(Bucket=data["bucket"])
     except ValueError as err:
         raise InvalidEndpointURLError from err
     except EndpointConnectionError as err:
@@ -34,6 +33,7 @@ async def get_client(data: dict[str, str]) -> AsyncGenerator[S3Client]:
     except ParamValidationError as err:
         if "Invalid bucket name" in str(err):
             raise InvalidBucketNameError from err
+    return client
 
 
 class CannotConnectError(Exception):

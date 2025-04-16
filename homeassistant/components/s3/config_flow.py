@@ -63,8 +63,8 @@ class S3ConfigFlow(ConfigFlow, domain=DOMAIN):
                 }
             )
             try:
-                async with get_client(user_input):
-                    pass
+                client = await get_client(user_input)
+                await client.__aexit__(None, None, None)
             except InvalidCredentialsError:
                 errors["base"] = "invalid_credentials"
             except InvalidBucketNameError:
