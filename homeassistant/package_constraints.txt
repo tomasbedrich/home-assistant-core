@@ -135,6 +135,12 @@ iso4217!=1.10.20220401
 # cryptography 42.0.0 is installed with botocore
 pyOpenSSL>=24.0.0
 
+# Constrain boto3 and aiobotocore to avoid conflicts where custom integrations
+# install incompatible botocore versions, breaking aiobotocore-based integrations.
+# https://github.com/home-assistant/core/pull/170783
+boto3>=1.42.97
+aiobotocore>=3.7.0
+
 # protobuf must be in package constraints for the wheel
 # builder to build binary wheels
 protobuf==4.25.4
